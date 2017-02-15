@@ -112,6 +112,15 @@ void run_echo(EchoCommand cmd) {
   // string is always NULL) list of strings.
   char** str = cmd.args;
 
+
+    if (*strs != NULL) {
+      printf("%s ", *strs);
+      fflush(stdout);
+
+      str =strs + 1; // Recurse on the next element in the string array
+    }
+  }
+
   // TODO: Remove warning silencers
   (void) str; // Silence unused variable warning
 
