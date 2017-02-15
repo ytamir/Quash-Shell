@@ -28,7 +28,7 @@
 char* get_current_directory(bool* should_free) {
   // TODO: Get the current working directory. This will fix the prompt path.
   // HINT: This should be pretty simple
-  IMPLEMENT_ME();
+  IMPLEMENT_ME();//1
 
   // Change this to true if necessary
   *should_free = false;
@@ -42,7 +42,7 @@ const char* lookup_env(const char* env_var) {
   // to interpret variables from the command line and display the prompt
   // correctly
   // HINT: This should be pretty simple
-  IMPLEMENT_ME();
+  IMPLEMENT_ME();//2
 
   // TODO: Remove warning silencers
   (void) env_var; // Silence unused variable warning
@@ -55,7 +55,7 @@ void check_jobs_bg_status() {
   // TODO: Check on the statuses of all processes belonging to all background
   // jobs. This function should remove jobs from the jobs queue once all
   // processes belonging to a job have completed.
-  IMPLEMENT_ME();
+  IMPLEMENT_ME();//3
 
   // TODO: Once jobs are implemented, uncomment and fill the following line
   // print_job_bg_complete(job_id, pid, cmd);
@@ -97,7 +97,7 @@ void run_generic(GenericCommand cmd) {
   (void) args; // Silence unused variable warning
 
   // TODO: Implement run generic
-  IMPLEMENT_ME();
+  IMPLEMENT_ME();//4
 
   perror("ERROR: Failed to execute program");
 }
@@ -112,7 +112,7 @@ void run_echo(EchoCommand cmd) {
   (void) str; // Silence unused variable warning
 
   // TODO: Implement echo
-  IMPLEMENT_ME();
+  IMPLEMENT_ME();//5
 
   // Flush the buffer before returning
   fflush(stdout);
@@ -130,7 +130,7 @@ void run_export(ExportCommand cmd) {
 
   // TODO: Implement export.
   // HINT: This should be quite simple.
-  IMPLEMENT_ME();
+  IMPLEMENT_ME();//6
 }
 
 // Changes the current working directory
@@ -149,7 +149,7 @@ void run_cd(CDCommand cmd) {
   // TODO: Update the PWD environment variable to be the new current working
   // directory and optionally update OLD_PWD environment variable to be the old
   // working directory.
-  IMPLEMENT_ME();
+  IMPLEMENT_ME();//7
 }
 
 // Sends a signal to all processes contained in a job
@@ -162,14 +162,14 @@ void run_kill(KillCommand cmd) {
   (void) job_id; // Silence unused variable warning
 
   // TODO: Kill all processes associated with a background job
-  IMPLEMENT_ME();
+  IMPLEMENT_ME();//8
 }
 
 
 // Prints the current working directory to stdout
 void run_pwd() {
   // TODO: Print the current working directory
-  IMPLEMENT_ME();
+  IMPLEMENT_ME();//9
 
   // Flush the buffer before returning
   fflush(stdout);
@@ -178,7 +178,7 @@ void run_pwd() {
 // Prints all background jobs currently in the job list to stdout
 void run_jobs() {
   // TODO: Print background jobs
-  IMPLEMENT_ME();
+  IMPLEMENT_ME();//10
 
   // Flush the buffer before returning
   fflush(stdout);
