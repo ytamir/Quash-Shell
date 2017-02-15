@@ -295,6 +295,19 @@ void create_process(CommandHolder holder) {
   bool r_app = holder.flags & REDIRECT_APPEND; // This can only be true if r_out
                                                // is true
 
+  //PLACE TO FORK
+  /*
+   *
+   * The create_process() function is intended to be the place where you fork processes,
+   *  handle pipe creation, and file redirection. You should not call execvp(3) from this
+   *  function. Instead you should call derivatives of the example_run_command() function.
+   *  Also you can determine whether you should use the boolean variables at the top of this
+   *  function to determine if pipes and redirects should be setup. It may be necessary to
+   *  keep a global execution state structure so that different calls to create process can
+   *  view important information created in previous invocations of create_process() (i.e.
+   *  the file descriptors for open pipes of previous processes).
+   */
+
   // TODO: Remove warning silencers
   (void) p_in;  // Silence unused variable warning
   (void) p_out; // Silence unused variable warning
