@@ -113,12 +113,11 @@ void run_echo(EchoCommand cmd) {
   char** str = cmd.args;
 
 
-    if (*strs != NULL) {
-      printf("%s ", *strs);
-      fflush(stdout);
+  while (*str != NULL) {
+    printf("%s ", *strs);
+    fflush(stdout);
 
-      str =strs + 1; // Recurse on the next element in the string array
-    }
+    str =str + 1; // Recurse on the next element in the string array
   }
 
   // TODO: Remove warning silencers
@@ -329,7 +328,7 @@ void create_process(CommandHolder holder) {
   (void) r_app; // Silence unused variable warning
 
   // TODO: Setup pipes, redirects, and new process
-  IMPLEMENT_ME();
+  IMPLEMENT_ME();//11
 
   //parent_run_command(holder.cmd); // This should be done in the parent branch of
                                   // a fork
@@ -358,12 +357,12 @@ void run_script(CommandHolder* holders) {
   if (!(holders[0].flags & BACKGROUND)) {
     // Not a background Job
     // TODO: Wait for all processes under the job to complete
-    IMPLEMENT_ME();
+    IMPLEMENT_ME();//12
   }
   else {
     // A background job.
     // TODO: Push the new job to the job queue
-    IMPLEMENT_ME();
+    IMPLEMENT_ME();//13
 
     // TODO: Once jobs are implemented, uncomment and fill the following line
     // print_job_bg_start(job_id, pid, cmd);
