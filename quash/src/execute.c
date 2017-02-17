@@ -34,10 +34,10 @@ char* get_current_directory(bool* should_free) {
   //IMPLEMENT_ME();//1
 
   // Change this to true if necessary
-  *should_free = true; // not sure what this should_free is
+  *should_free = false; // not sure what this should_free is
 
 
-  return getcwd(NULL, 0);
+  return getcwd(NULL, 1024);
 }
 
 // Returns the value of an environment variable env_var
@@ -320,12 +320,26 @@ void create_process(CommandHolder holder) {
    *  the file descriptors for open pipes of previous processes).
    */
 
+
+   pid_t child;
+   child = fork();
+   if(child == 0){
+       child_run_command(holder.cmd);
+       exit(0);
+   }
+   else{ //parent process
+       parent_run_command(holder.cmd);
+       exit(0);
+   }
+
+
+
   // TODO: Remove warning silencers
-  //(void) p_in;  // Silence unused variable warning
-  //(void) p_out; // Silence unused variable warning
-  //(void) r_in;  // Silence unused variable warning
-  //(void) r_out; // Silence unused variable warning
-  //(void) r_app; // Silence unused variable warning
+  (void) p_in;  // Silence unused variable warning
+  (void) p_out; // Silence unused variable warning
+  (void) r_in;  // Silence unused variable warning
+  (void) r_out; // Silence unused variable warning
+  (void) r_app; // Silence unused variable warning
 
   // TODO: Setup pipes, redirects, and new process
   IMPLEMENT_ME();//11
@@ -333,6 +347,14 @@ void create_process(CommandHolder holder) {
   //parent_run_command(holder.cmd); // This should be done in the parent branch of
                                   // a fork
   //child_run_command(holder.cmd); // This should be done in the child branch of a fork
+
+
+/* From Lab 3, we might use this, but wait for now
+  if ((waitpid(CHILD, &status, 0)) == -1) {
+      fprintf(stderr, "Process 1 encountered an error. ERROR%d", errno);
+      return EXIT_FAILURE;
+  }
+  */
 }
 
 // Run a list of commands
