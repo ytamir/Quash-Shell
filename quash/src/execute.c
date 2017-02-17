@@ -158,11 +158,11 @@ void run_cd(CDCommand cmd) {
   }
 
   // TODO: Change directory
-
+  chdir(dir);
   // TODO: Update the PWD environment variable to be the new current working
   // directory and optionally update OLD_PWD environment variable to be the old
   // working directory.
-  IMPLEMENT_ME();//7
+  //IMPLEMENT_ME();//7
 }
 
 // Sends a signal to all processes contained in a job
@@ -233,7 +233,11 @@ void child_run_command(Command cmd) {
     break;
 
   case EXPORT:
+
   case CD:
+    run_cd(cmd.cd);
+    break;
+
   case KILL:
   case EXIT:
   case EOC:
@@ -330,7 +334,6 @@ void create_process(CommandHolder holder) {
    }
    else{ //parent process
        parent_run_command(holder.cmd);
-       exit(0);
    }
 
 
@@ -343,7 +346,7 @@ void create_process(CommandHolder holder) {
   (void) r_app; // Silence unused variable warning
 
   // TODO: Setup pipes, redirects, and new process
-  IMPLEMENT_ME();//11
+  //IMPLEMENT_ME();//11
 
   //parent_run_command(holder.cmd); // This should be done in the parent branch of
                                   // a fork
