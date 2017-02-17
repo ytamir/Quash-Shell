@@ -115,17 +115,17 @@ void run_echo(EchoCommand cmd) {
 
 
   while (*str != NULL) {
-    printf("%s ", *str);
+    printf("%s", *str);
     fflush(stdout);
 
     str =str + 1; // Recurse on the next element in the string array
   }
-
+  printf("\n");
   // TODO: Remove warning silencers
   (void) str; // Silence unused variable warning
 
   // TODO: Implement echo
-  IMPLEMENT_ME();//5
+  //IMPLEMENT_ME();//5
 
   // Flush the buffer before returning
   fflush(stdout);
@@ -138,12 +138,14 @@ void run_export(ExportCommand cmd) {
   const char* val = cmd.val;
 
   // TODO: Remove warning silencers
-  (void) env_var; // Silence unused variable warning
-  (void) val;     // Silence unused variable warning
+  //(void) env_var; // Silence unused variable warning
+  //(void) val;     // Silence unused variable warning
 
   // TODO: Implement export.
   // HINT: This should be quite simple.
-  IMPLEMENT_ME();//6
+  //IMPLEMENT_ME();//6
+  setenv(env_var,val,1);
+
 }
 
 // Changes the current working directory
