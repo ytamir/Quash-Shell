@@ -182,8 +182,8 @@ void run_kill(KillCommand cmd) {
 // Prints the current working directory to stdout
 void run_pwd() {
   // TODO: Print the current working directory
-  IMPLEMENT_ME();//9
-
+  //IMPLEMENT_ME();//9
+  printf("%s\n",getcwd(NULL,0));
   // Flush the buffer before returning
   fflush(stdout);
 }
@@ -278,6 +278,8 @@ void parent_run_command(Command cmd) {
   case GENERIC:
   case ECHO:
   case PWD:
+    //run_pwd(cmd.pwd);
+    break;
   case JOBS:
   case EXIT:
   case EOC:
