@@ -34,10 +34,10 @@ char* get_current_directory(bool* should_free) {
   //IMPLEMENT_ME();//1
 
   // Change this to true if necessary
-  *should_free = false; // not sure what this should_free is
+  *should_free = true; // not sure what this should_free is
 
 
-  return getcwd(NULL, 1024);
+  return getcwd(NULL, 0);
 }
 
 // Returns the value of an environment variable env_var
@@ -321,11 +321,11 @@ void create_process(CommandHolder holder) {
    */
 
   // TODO: Remove warning silencers
-  (void) p_in;  // Silence unused variable warning
-  (void) p_out; // Silence unused variable warning
-  (void) r_in;  // Silence unused variable warning
-  (void) r_out; // Silence unused variable warning
-  (void) r_app; // Silence unused variable warning
+  //(void) p_in;  // Silence unused variable warning
+  //(void) p_out; // Silence unused variable warning
+  //(void) r_in;  // Silence unused variable warning
+  //(void) r_out; // Silence unused variable warning
+  //(void) r_app; // Silence unused variable warning
 
   // TODO: Setup pipes, redirects, and new process
   IMPLEMENT_ME();//11
