@@ -114,7 +114,7 @@ void run_echo(EchoCommand cmd) {
 
 
   while (*str != NULL) {
-    printf("%s ", *strs);
+    printf("%s ", *str);
     fflush(stdout);
 
     str =str + 1; // Recurse on the next element in the string array
