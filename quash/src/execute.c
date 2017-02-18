@@ -98,12 +98,12 @@ void run_generic(GenericCommand cmd) {
   char** args = cmd.args;
 
   // TODO: Remove warning silencers
-  exec; // Silence unused variable warning
-  args; // Silence unused variable warning
+  //exec; // Silence unused variable warning
+  //args; // Silence unused variable warning
 
   // TODO: Implement run generic
   //IMPLEMENT_ME();//4
-
+  execvp(exec,args);
   perror("ERROR: Failed to execute program");
 }
 
@@ -165,6 +165,7 @@ void run_cd(CDCommand cmd) {
   // directory and optionally update OLD_PWD environment variable to be the old
   // working directory.
   //IMPLEMENT_ME();//7
+  setenv("PWD",dir,1);
 }
 
 // Sends a signal to all processes contained in a job
@@ -185,9 +186,11 @@ void run_kill(KillCommand cmd) {
 void run_pwd() {
   // TODO: Print the current working directory
   //IMPLEMENT_ME();//9
-  printf("%s\n",getcwd(NULL,0));
+  char* wd_40 = getcwd(NULL,0);
+  printf("%s\n",wd_40);
   // Flush the buffer before returning
   fflush(stdout);
+  free(wd_40);
 }
 
 // Prints all background jobs currently in the job list to stdout
@@ -329,21 +332,21 @@ void create_process(CommandHolder holder) {
    *  view important information created in previous invocations of create_process() (i.e.
    *  the file descriptors for open pipes of previous processes).
    */
-   
+   /*
    if(p_in || p_out){
        int pipey[2];
        pipe(pipey);
 
        if(p_in){
-           dup2(pipey[1],1);
-       }
-       else if(p_out){
            dup2(pipey[0],0);
        }
-
+       else if(p_out){
+           dup2(pipey[1],1);
+       }
        close(pipey[0]);
        close(pipey[1]);
    }
+   */
 
    pid_t child;
    child = fork();
