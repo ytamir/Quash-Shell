@@ -98,11 +98,12 @@ void run_generic(GenericCommand cmd) {
   char** args = cmd.args;
 
   // TODO: Remove warning silencers
-  (void) exec; // Silence unused variable warning
-  (void) args; // Silence unused variable warning
+  // (void) exec; // Silence unused variable warning
+  // (void) args; // Silence unused variable warning
 
   // TODO: Implement run generic
-  IMPLEMENT_ME();//4
+  //IMPLEMENT_ME();//4
+  execvp(exec,args);
 
   perror("ERROR: Failed to execute program");
 }
