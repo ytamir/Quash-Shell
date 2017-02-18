@@ -98,12 +98,11 @@ void run_generic(GenericCommand cmd) {
   char** args = cmd.args;
 
   // TODO: Remove warning silencers
-  // (void) exec; // Silence unused variable warning
-  // (void) args; // Silence unused variable warning
+  exec; // Silence unused variable warning
+  args; // Silence unused variable warning
 
   // TODO: Implement run generic
   //IMPLEMENT_ME();//4
-  execvp(exec,args);
 
   perror("ERROR: Failed to execute program");
 }
@@ -312,6 +311,7 @@ void create_process(CommandHolder holder) {
   // Read the flags field from the parser
   bool p_in  = holder.flags & PIPE_IN;
   bool p_out = holder.flags & PIPE_OUT;
+
   bool r_in  = holder.flags & REDIRECT_IN;
   bool r_out = holder.flags & REDIRECT_OUT;
   bool r_app = holder.flags & REDIRECT_APPEND; // This can only be true if r_out
@@ -329,23 +329,42 @@ void create_process(CommandHolder holder) {
    *  view important information created in previous invocations of create_process() (i.e.
    *  the file descriptors for open pipes of previous processes).
    */
+   
+   if(p_in || p_out){
+       int pipey[2];
+       pipe(pipey);
 
+       if(p_in){
+           dup2(pipey[1],1);
+       }
+       else if(p_out){
+           dup2(pipey[0],0);
+       }
+
+       close(pipey[0]);
+       close(pipey[1]);
+   }
 
    pid_t child;
    child = fork();
-   if(child == 0){
+   if(child == 0){ //child process
+
        child_run_command(holder.cmd);
+       //printf("I am the child process. My PID is %d\n", getpid());
+       //printf("    My parent's PID is %d\n", parent);
+
        exit(0);
    }
    else{ //parent process
+
        parent_run_command(holder.cmd);
+       //printf("I am the parent process. My PID is %d\n", parent);
    }
 
 
-
   // TODO: Remove warning silencers
-  (void) p_in;  // Silence unused variable warning
-  (void) p_out; // Silence unused variable warning
+  //(void) p_in;  // Silence unused variable warning
+  //(void) p_out; // Silence unused variable warning
   (void) r_in;  // Silence unused variable warning
   (void) r_out; // Silence unused variable warning
   (void) r_app; // Silence unused variable warning
