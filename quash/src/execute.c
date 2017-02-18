@@ -238,7 +238,7 @@ void child_run_command(Command cmd) {
   case EXPORT:
 
   case CD:
-    run_cd(cmd.cd);
+    //run_cd(cmd.cd);
     break;
 
   case KILL:
