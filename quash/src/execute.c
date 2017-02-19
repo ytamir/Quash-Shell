@@ -362,13 +362,17 @@ void create_process(CommandHolder holder) {
              dup2(pipey[0],0);
 
 
-             FILE * file;
-             file = open(holder.redirect_out,O_WRONLY|O_TRUNC,S_IWUSR);
+             //FILE * file;
+             FILE *fout;
+             fout = fopen(holder.redirect_out, "w");
+             dup2(fileno(fout), STDOUT_FILENO);
+
+             printf("heybud");
              //printf(holder.redirect_out);
+             fclose(fout);
+             //dup2(file,1);
 
-             dup2(file,1);
-
-             close(file);
+             //close(file);
              close(pipey[0]);
              close(pipey[1]);
              exit(0);
