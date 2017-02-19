@@ -30,6 +30,22 @@
  * Interface Functions
  ***************************************************************************/
 
+ typedef struct Process{
+     int pid;
+ } process;
+
+ IMPLEMENT_DEQUE_STRUCT(ProcessQueue,process);
+ IMPLEMENT_DEQUE(ProcessQueue,process);
+
+ typedef struct Job{
+     ProcessQueue processes;
+     int job_id;
+ } job;
+
+ IMPLEMENT_DEQUE_STRUCT(JobQueue,job);
+ IMPLEMENT_DEQUE(JobQueue,job);
+
+
 // Return a string containing the current working directory.
 char* get_current_directory(bool* should_free) {
   // TODO: Get the current working directory. This will fix the prompt path.
