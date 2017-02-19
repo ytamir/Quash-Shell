@@ -338,50 +338,68 @@ void create_process(CommandHolder holder) {
 
      if(r_out){
 
-         pid_t child1,child2;
+         pid_t child1;
          child1 = fork();
-         child2 = fork();
+         //child2 = fork();
+         FILE *fout;
 
          int pipey[2];
          pipe(pipey);
 
          if(child1 == 0){
+             if (r_out == 1)
+             {
+                 if (r_app == 1)
+                 {
+                     fout = fopen(holder.redirect_out, "a");
+                     dup2(fileno(fout),1);
 
-             dup2(pipey[1],1);
-             close(pipey[0]);
-             close(pipey[1]);
+                 }
+                 else
+                 {
+                     fout = fopen(holder.redirect_out, "w");
+                     dup2(fileno(fout),1);
+
+                 }
+             }
+
+            // dup2(pipey[1],1);
+             //close(pipey[0]);
+             //close(pipey[1]);
 
              child_run_command(holder.cmd);
-             printf("I am the child process. My PID is %d\n", getpid());
+             //printf("I am the child process. My PID is %d\n", getpid());
              //printf("    My parent's PID is %d\n", parent);
 
              exit(0);
-         }
-         else if(child2){
+
+        /* else if(child2){
 
              dup2(pipey[0],0);
 
 
              //FILE * file;
-             FILE *fout;
-             fout = fopen(holder.redirect_out, "w");
-             dup2(fileno(fout), STDOUT_FILENO);
 
-             printf("heybud");
+             fout = fopen(holder.redirect_out, "w");
+             dup2(fileno(fout), 1);
+             //dup2(fileno(fout),pipey[0]);
+             //dup2(pipey[1],1);
+
+             printf((char*)pipey[1]);
              //printf(holder.redirect_out);
              fclose(fout);
              //dup2(file,1);
 
              //close(file);
-             close(pipey[0]);
-             close(pipey[1]);
-             exit(0);
+             //close(pipey[0]);
+             //close(pipey[1]);
+             //exit(0);
          }
          else{ //parent process
 
              parent_run_command(holder.cmd);
              //printf("I am the parent process. My PID is %d\n", getpid());
-         }
+         }*/
 
 
      }
@@ -421,6 +439,7 @@ void create_process(CommandHolder holder) {
 
 
 
+}
 }
 
 // Run a list of commands
