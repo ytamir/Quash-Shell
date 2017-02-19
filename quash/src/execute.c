@@ -15,6 +15,9 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <errno.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 // Remove this and all expansion calls to it
 /**
@@ -311,81 +314,109 @@ void parent_run_command(Command cmd) {
  * @sa Command CommandHolder
  */
 void create_process(CommandHolder holder) {
-  // Read the flags field from the parser
-  bool p_in  = holder.flags & PIPE_IN;
-  bool p_out = holder.flags & PIPE_OUT;
+    // Read the flags field from the parser
+    bool p_in  = holder.flags & PIPE_IN;
+    bool p_out = holder.flags & PIPE_OUT;
 
-  bool r_in  = holder.flags & REDIRECT_IN;
-  bool r_out = holder.flags & REDIRECT_OUT;
-  bool r_app = holder.flags & REDIRECT_APPEND; // This can only be true if r_out
-                                               // is true
+    bool r_in  = holder.flags & REDIRECT_IN;
+    bool r_out = holder.flags & REDIRECT_OUT;
+    bool r_app = holder.flags & REDIRECT_APPEND; // This can only be true if r_out
+                                                 // is true
 
-  //PLACE TO FORK
-  /*
-   *
-   * The create_process() function is intended to be the place where you fork processes,
-   *  handle pipe creation, and file redirection. You should not call execvp(3) from this
-   *  function. Instead you should call derivatives of the example_run_command() function.
-   *  Also you can determine whether you should use the boolean variables at the top of this
-   *  function to determine if pipes and redirects should be setup. It may be necessary to
-   *  keep a global execution state structure so that different calls to create process can
-   *  view important information created in previous invocations of create_process() (i.e.
-   *  the file descriptors for open pipes of previous processes).
-   */
-   /*
-   if(p_in || p_out){
-       int pipey[2];
-       pipe(pipey);
+    //PLACE TO FORK
+    /*
+     *
+     * The create_process() function is intended to be the place where you fork processes,
+     *  handle pipe creation, and file redirection. You should not call execvp(3) from this
+     *  function. Instead you should call derivatives of the example_run_command() function.
+     *  Also you can determine whether you should use the boolean variables at the top of this
+     *  function to determine if pipes and redirects should be setup. It may be necessary to
+     *  keep a global execution state structure so that different calls to create process can
+     *  view important information created in previous invocations of create_process() (i.e.
+     *  the file descriptors for open pipes of previous processes).
+     */
 
-       if(p_in){
-           dup2(pipey[0],0);
-       }
-       else if(p_out){
-           dup2(pipey[1],1);
-       }
-       close(pipey[0]);
-       close(pipey[1]);
-   }
-   */
+     if(r_out){
 
-   pid_t child;
-   child = fork();
-   if(child == 0){ //child process
+         pid_t child1,child2;
+         child1 = fork();
+         child2 = fork();
 
-       child_run_command(holder.cmd);
-       //printf("I am the child process. My PID is %d\n", getpid());
-       //printf("    My parent's PID is %d\n", parent);
+         int pipey[2];
+         pipe(pipey);
 
-       exit(0);
-   }
-   else{ //parent process
+         if(child1 == 0){
 
-       parent_run_command(holder.cmd);
-       //printf("I am the parent process. My PID is %d\n", parent);
-   }
+             dup2(pipey[1],1);
+             close(pipey[0]);
+             close(pipey[1]);
+
+             child_run_command(holder.cmd);
+             printf("I am the child process. My PID is %d\n", getpid());
+             //printf("    My parent's PID is %d\n", parent);
+
+             exit(0);
+         }
+         else if(child2){
+
+             dup2(pipey[0],0);
 
 
-  // TODO: Remove warning silencers
-  //(void) p_in;  // Silence unused variable warning
-  //(void) p_out; // Silence unused variable warning
-  (void) r_in;  // Silence unused variable warning
-  (void) r_out; // Silence unused variable warning
-  (void) r_app; // Silence unused variable warning
+             FILE * file;
+             file = open(holder.redirect_out,O_WRONLY|O_TRUNC,S_IWUSR);
+             //printf(holder.redirect_out);
 
-  // TODO: Setup pipes, redirects, and new process
-  //IMPLEMENT_ME();//11
+             dup2(file,1);
 
-  //parent_run_command(holder.cmd); // This should be done in the parent branch of
-                                  // a fork
-  //child_run_command(holder.cmd); // This should be done in the child branch of a fork
+             close(file);
+             close(pipey[0]);
+             close(pipey[1]);
+             exit(0);
+         }
+         else{ //parent process
+
+             parent_run_command(holder.cmd);
+             //printf("I am the parent process. My PID is %d\n", getpid());
+         }
 
 
-/* From Lab 3, we might use this, but wait for now
-  if ((waitpid(CHILD, &status, 0)) == -1) {
-      fprintf(stderr, "Process 1 encountered an error. ERROR%d", errno);
-      return EXIT_FAILURE;
-  }
-  */
+     }
+     else{
+          pid_t child;
+          child = fork();
+          if(child == 0){ //child process
+
+            child_run_command(holder.cmd);
+            //printf("I am the child process. My PID is %d\n", getpid());
+            //printf("    My parent's PID is %d\n", parent);
+
+            exit(0);
+          }
+          else{ //parent process
+
+            parent_run_command(holder.cmd);
+            //printf("I am the parent process. My PID is %d\n", parent);
+          }
+     }
+
+
+
+    // TODO: Remove warning silencers
+    (void) p_in;  // Silence unused variable warning
+    (void) p_out; // Silence unused variable warning
+    (void) r_in;  // Silence unused variable warning
+    (void) r_out; // Silence unused variable warning
+    (void) r_app; // Silence unused variable warning
+
+    // TODO: Setup pipes, redirects, and new process
+    //IMPLEMENT_ME();//11
+
+    //parent_run_command(holder.cmd); // This should be done in the parent branch of
+                                    // a fork
+    //child_run_command(holder.cmd); // This should be done in the child branch of a fork
+
+
+
 }
 
 // Run a list of commands
