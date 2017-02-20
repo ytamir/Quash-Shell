@@ -30,22 +30,6 @@
  * Interface Functions
  ***************************************************************************/
 
- typedef struct Process{
-     int pid;
- } process;
-
- IMPLEMENT_DEQUE_STRUCT(ProcessQueue,process);
- IMPLEMENT_DEQUE(ProcessQueue,process);
-
- typedef struct Job{
-     ProcessQueue processes;
-     int job_id;
- } job;
-
- IMPLEMENT_DEQUE_STRUCT(JobQueue,job);
- IMPLEMENT_DEQUE(JobQueue,job);
-
-
 // Return a string containing the current working directory.
 char* get_current_directory(bool* should_free) {
   // TODO: Get the current working directory. This will fix the prompt path.
@@ -338,6 +322,12 @@ void create_process(CommandHolder holder) {
     bool r_out = holder.flags & REDIRECT_OUT;
     bool r_app = holder.flags & REDIRECT_APPEND; // This can only be true if r_out
                                                  // is true
+    // TODO: Remove warning silencers
+    (void) p_in;  // Silence unused variable warning
+    (void) p_out; // Silence unused variable warning
+    (void) r_in;  // Silence unused variable warning
+    (void) r_out; // Silence unused variable warning
+    (void) r_app; // Silence unused variable warning
 
     //PLACE TO FORK
     /*
@@ -352,110 +342,43 @@ void create_process(CommandHolder holder) {
      *  the file descriptors for open pipes of previous processes).
      */
 
-     if(r_out){
+     int pipey[2];
+     pipe(pipey);
 
-         pid_t child1;
-         child1 = fork();
-         //child2 = fork();
-         FILE *fout;
-
-         int pipey[2];
-         pipe(pipey);
-
-         if(child1 == 0){
-             if (r_out == 1)
+     pid_t child;
+     child = fork();
+     if(child == 0){
+         if (r_out == 1)
+         {
+             FILE *fout;
+             if (r_app == 1)
              {
-                 if (r_app == 1)
-                 {
-                     fout = fopen(holder.redirect_out, "a");
-                     dup2(fileno(fout),1);
+                 fout = fopen(holder.redirect_out, "a");
+                 dup2(fileno(fout),1);
 
-                 }
-                 else
-                 {
-                     fout = fopen(holder.redirect_out, "w");
-                     dup2(fileno(fout),1);
-
-                 }
              }
+             else
+             {
+                 fout = fopen(holder.redirect_out, "w");
+                 dup2(fileno(fout),1);
 
-            // dup2(pipey[1],1);
-             //close(pipey[0]);
-             //close(pipey[1]);
-
-             child_run_command(holder.cmd);
-             //printf("I am the child process. My PID is %d\n", getpid());
-             //printf("    My parent's PID is %d\n", parent);
-
-             exit(0);
-
-        /* else if(child2){
-
-             dup2(pipey[0],0);
-
-
-             //FILE * file;
-
-             fout = fopen(holder.redirect_out, "w");
-             dup2(fileno(fout), 1);
-             //dup2(fileno(fout),pipey[0]);
-             //dup2(pipey[1],1);
-
-             printf((char*)pipey[1]);
-             //printf(holder.redirect_out);
-             fclose(fout);
-             //dup2(file,1);
-
-             //close(file);
-             //close(pipey[0]);
-             //close(pipey[1]);
-             //exit(0);
+             }
          }
-         else{ //parent process
 
-             parent_run_command(holder.cmd);
-             //printf("I am the parent process. My PID is %d\n", getpid());
-         }*/
+        // dup2(pipey[1],1);
+         //close(pipey[0]);
+         //close(pipey[1]);
 
+         child_run_command(holder.cmd);
+         //printf("I am the child process. My PID is %d\n", getpid());
+         //printf("    My parent's PID is %d\n", parent);
+         exit(0);
+    }
+    else{
 
-     }
-     else{
-          pid_t child;
-          child = fork();
-          if(child == 0){ //child process
-
-            child_run_command(holder.cmd);
-            //printf("I am the child process. My PID is %d\n", getpid());
-            //printf("    My parent's PID is %d\n", parent);
-
-            exit(0);
-          }
-          else{ //parent process
-
-            parent_run_command(holder.cmd);
-            //printf("I am the parent process. My PID is %d\n", parent);
-          }
-     }
-
-
-
-    // TODO: Remove warning silencers
-    (void) p_in;  // Silence unused variable warning
-    (void) p_out; // Silence unused variable warning
-    (void) r_in;  // Silence unused variable warning
-    (void) r_out; // Silence unused variable warning
-    (void) r_app; // Silence unused variable warning
-
-    // TODO: Setup pipes, redirects, and new process
-    //IMPLEMENT_ME();//11
-
-    //parent_run_command(holder.cmd); // This should be done in the parent branch of
-                                    // a fork
-    //child_run_command(holder.cmd); // This should be done in the child branch of a fork
-
-
-
-}
+        parent_run_command(holder.cmd);
+        //printf("I am the parent process. My PID is %d\n", parent);
+    }
 }
 
 // Run a list of commands
