@@ -12,6 +12,8 @@
 
 #include "command.h"
 
+
+void Initialize();
 /**
  * @brief Function to get environment variable values
  *

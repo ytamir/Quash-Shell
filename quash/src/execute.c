@@ -19,6 +19,18 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+#include "job_queue.h"
+
+job_queue BG_Jobs;
+job_queue FG_Jobs;
+
+pid_queue processes_temp;
+
+bool initialized = 0;
+
+int BG_num;
+int FG_num;
+
 // Remove this and all expansion calls to it
 /**
  * @brief Note calls to any function that requires implementation
@@ -379,10 +391,17 @@ void create_process(CommandHolder holder) {
         parent_run_command(holder.cmd);
         //printf("I am the parent process. My PID is %d\n", parent);
     }
+
+    push_front_pid_queue(&processes_temp,getpid());
+
 }
 
 // Run a list of commands
 void run_script(CommandHolder* holders) {
+
+// If the global Job queues are not initialized, then initialize them
+  if(!initialized) Initialize();
+
   if (holders == NULL)
     return;
 
@@ -396,14 +415,22 @@ void run_script(CommandHolder* holders) {
 
   CommandType type;
 
+  // create a new pid queue and a new job for every command
+  processes_temp = new_pid_queue(1);
+
   // Run all commands in the `holder` array
-  for (int i = 0; (type = get_command_holder_type(holders[i])) != EOC; ++i)
-    create_process(holders[i]);
+  for (int i = 0; (type = get_command_holder_type(holders[i])) != EOC; ++i){
+      create_process(holders[i]);
+  }
 
   if (!(holders[0].flags & BACKGROUND)) {
-    // Not a background Job
-    // TODO: Wait for all processes under the job to complete
-    IMPLEMENT_ME();//12
+      //create a job from the process queue and add it to the global job queue.
+          struct Job tempJob;
+          tempJob.id = FG_num;
+          tempJob.process_queue = processes_temp;
+
+          push_front_job_queue(&FG_Jobs,tempJob);
+          FG_num + 1;
   }
   else {
     // A background job.
@@ -412,5 +439,22 @@ void run_script(CommandHolder* holders) {
 
     // TODO: Once jobs are implemented, uncomment and fill the following line
     // print_job_bg_start(job_id, pid, cmd);
+
+    //create a job from the process queue and add it to the global job queue.
+        struct Job tempJob;
+        tempJob.id = BG_num;
+        tempJob.process_queue = processes_temp;
+
+        push_front_job_queue(&BG_Jobs,tempJob);
+        BG_num + 1;
   }
+}
+
+void Initialize(){
+    FG_Jobs = new_job_queue(1);
+
+    BG_num = 0;
+    FG_num = 0;
+    initialized = 1;
+
 }
