@@ -181,7 +181,8 @@ void run_kill(KillCommand cmd) {
   (void) job_id; // Silence unused variable warning
 
   // TODO: Kill all processes associated with a background job
-  IMPLEMENT_ME();//8
+  //IMPLEMENT_ME();//8
+  kill(job_id, signal);
 }
 
 
@@ -348,9 +349,16 @@ void create_process(CommandHolder holder) {
      pid_t child;
      child = fork();
      if(child == 0){
+         FILE *fout;
+         if(r_in == 1)
+         {
+             fout = fopen(holder.redirect_in, "r");
+             dup2(fileno(fout),1);
+
+         }
          if (r_out == 1)
          {
-             FILE *fout;
+
              if (r_app == 1)
              {
                  fout = fopen(holder.redirect_out, "a");
