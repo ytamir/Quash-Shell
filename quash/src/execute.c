@@ -70,15 +70,43 @@ const char* lookup_env(const char* env_var) {
   return "???";
 }
 
+
+
 // Check the status of background jobs
 void check_jobs_bg_status() {
-  // TODO: Check on the statuses of all processes belonging to all background
+  // Check on the statuses of all processes belonging to all background
   // jobs. This function should remove jobs from the jobs queue once all
   // processes belonging to a job have completed.
-  IMPLEMENT_ME();//3
+
+  size_t length = length_job_queue(&BG_Jobs);
+  for(int i=0;i < length;i++){
+
+      jobtype temp_job = pop_back_job_queue(&BG_Jobs);
+      pid_queue processes = temp_job.process_queue;
+
+      size_t processes_num = length_pid_queue(&(processes));
+      for(int j=0;j<processes_num;j++){
+
+          pid_t process_id = pop_back_pid_queue(&processes);
+
+          if(kill(process_id,0) == 0){
+              //the process is still running
+              push_front_pid_queue(&processes,process_id);
+          }
+          else{
+              //the process is done
+          }
+
+      }
+
+      push_front_job_queue(&BG_Jobs, temp_job);
+  }
 
   // TODO: Once jobs are implemented, uncomment and fill the following line
   // print_job_bg_complete(job_id, pid, cmd);
+
+
+
 }
 
 // Prints the job id number, the process id of the first process belonging to
@@ -438,7 +466,7 @@ void run_script(CommandHolder* holders) {
           tempJob.process_queue = processes_temp;
 
           push_front_job_queue(&FG_Jobs,tempJob);
-          FG_num + 1;
+          FG_num += 1;
   }
   else {
     // A background job.
@@ -454,7 +482,7 @@ void run_script(CommandHolder* holders) {
         tempJob.process_queue = processes_temp;
 
         push_front_job_queue(&BG_Jobs,tempJob);
-        BG_num + 1;
+        BG_num += 1;
   }
 }
 

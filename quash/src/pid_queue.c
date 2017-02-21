@@ -10,4 +10,4 @@
 /*
  *Use the prototype macro to place all the pid_queue related functions here
  */
-IMPLEMENT_DEQUE (pid_queue, int);
+IMPLEMENT_DEQUE (pid_queue, pid_t);
