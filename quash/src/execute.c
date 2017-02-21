@@ -70,8 +70,6 @@ const char* lookup_env(const char* env_var) {
   return "???";
 }
 
-
-
 // Check the status of background jobs
 void check_jobs_bg_status() {
   // Check on the statuses of all processes belonging to all background
@@ -83,6 +81,9 @@ void check_jobs_bg_status() {
 
       jobtype temp_job = pop_back_job_queue(&BG_Jobs);
       pid_queue processes = temp_job.process_queue;
+
+      pid_t first_process_in_job = pop_front_pid_queue(&processes);
+      push_front_pid_queue(&processes,first_process_in_job);
 
       size_t processes_num = length_pid_queue(&(processes));
       for(int j=0;j<processes_num;j++){
@@ -98,14 +99,18 @@ void check_jobs_bg_status() {
           }
 
       }
+      if(is_empty_pid_queue(&processes)){
+          //the job is finished
 
-      push_front_job_queue(&BG_Jobs, temp_job);
+          //TODO: figure out what the command parameter is
+          print_job_bg_complete(temp_job.id, first_process_in_job, "???");
+      }
+      else{
+          //the job is not finished, put it back in the queue
+          push_front_job_queue(&BG_Jobs, temp_job);
+      }
+
   }
-
-  // TODO: Once jobs are implemented, uncomment and fill the following line
-  // print_job_bg_complete(job_id, pid, cmd);
-
-
 
 }
 
@@ -239,9 +244,16 @@ void run_pwd() {
 
 // Prints all background jobs currently in the job list to stdout
 void run_jobs() {
-  // TODO: Print background jobs
-  IMPLEMENT_ME();//10
+  printf("Current Background Jobs: ");
 
+  size_t length = length_job_queue(&BG_Jobs);
+  for(int i=0;i < length;i++){
+
+      jobtype temp_job = pop_back_job_queue(&BG_Jobs);
+      printf(" %d,",temp_job.id);
+      push_front_job_queue(&BG_Jobs, temp_job);
+  }
+  printf("\n");
   // Flush the buffer before returning
   fflush(stdout);
 }
@@ -471,7 +483,7 @@ void run_script(CommandHolder* holders) {
   else {
     // A background job.
     // TODO: Push the new job to the job queue
-    IMPLEMENT_ME();//13
+    //IMPLEMENT_ME();//13
 
     // TODO: Once jobs are implemented, uncomment and fill the following line
     // print_job_bg_start(job_id, pid, cmd);
@@ -488,6 +500,7 @@ void run_script(CommandHolder* holders) {
 
 void Initialize(){
     FG_Jobs = new_job_queue(1);
+    BG_Jobs = new_job_queue(1);
 
     BG_num = 0;
     FG_num = 0;
