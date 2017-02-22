@@ -375,37 +375,23 @@ void create_process(CommandHolder holder) {
     bool r_out = holder.flags & REDIRECT_OUT;
     bool r_app = holder.flags & REDIRECT_APPEND; // This can only be true if r_out
                                                  // is true
-    // TODO: Remove warning silencers
-    (void) p_in;  // Silence unused variable warning
-    (void) p_out; // Silence unused variable warning
-    (void) r_in;  // Silence unused variable warning
-    (void) r_out; // Silence unused variable warning
-    (void) r_app; // Silence unused variable warning
-
-    //PLACE TO FORK
-    /*
-     *
-     * The create_process() function is intended to be the place where you fork processes,
-     *  handle pipe creation, and file redirection. You should not call execvp(3) from this
-     *  function. Instead you should call derivatives of the example_run_command() function.
-     *  Also you can determine whether you should use the boolean variables at the top of this
-     *  function to determine if pipes and redirects should be setup. It may be necessary to
-     *  keep a global execution state structure so that different calls to create process can
-     *  view important information created in previous invocations of create_process() (i.e.
-     *  the file descriptors for open pipes of previous processes).
-     */
 
      int pipey[2];
      pipe(pipey);
 
      pid_t child;
      child = fork();
+
+     //add to the queue as soon as it is forked
+     push_front_pid_queue(&processes_temp,child);
+
      if(child == 0){
          FILE *fout;
          if(r_in == 1)
          {
              fout = fopen(holder.redirect_in, "r");
              dup2(fileno(fout),1);
+             close(fout);
 
          }
          if (r_out == 1)
@@ -421,26 +407,35 @@ void create_process(CommandHolder holder) {
              {
                  fout = fopen(holder.redirect_out, "w");
                  dup2(fileno(fout),1);
-
              }
          }
-
-        // dup2(pipey[1],1);
-         //close(pipey[0]);
-         //close(pipey[1]);
+         if(p_out){
+             dup2(pipey[1],1);
+             close(pipey[1]);
+             close(pipey[0]);
+         }
+         if(p_in){
+             dup2(pipey[0],0);
+             close(pipey[0]);
+             close(pipey[1]);
+         }
 
          child_run_command(holder.cmd);
+
          //printf("I am the child process. My PID is %d\n", getpid());
          //printf("    My parent's PID is %d\n", parent);
+         close(pipey[1]);
+         close(pipey[0]);
+
          exit(0);
     }
     else{
-
         parent_run_command(holder.cmd);
+
+        close(pipey[1]);
+        close(pipey[0]);
         //printf("I am the parent process. My PID is %d\n", parent);
     }
-
-    push_front_pid_queue(&processes_temp,getpid());
 
 }
 
@@ -471,30 +466,27 @@ void run_script(CommandHolder* holders) {
       create_process(holders[i]);
   }
 
-  if (!(holders[0].flags & BACKGROUND)) {
+  if (!(holders[0].flags & BACKGROUND)) { //Not a Background job
       //create a job from the process queue and add it to the global job queue.
-          struct Job tempJob;
-          tempJob.id = FG_num;
-          tempJob.process_queue = processes_temp;
 
-          push_front_job_queue(&FG_Jobs,tempJob);
-          FG_num += 1;
+      while(!(is_empty_pid_queue(&processes_temp))){
+
+          pid_t JoelEmbiid = pop_back_pid_queue(&processes_temp);
+          waitpid(JoelEmbiid,NULL,0);
+      }
+
+      destroy_pid_queue(&processes_temp);
   }
   else {
-    // A background job.
-    // TODO: Push the new job to the job queue
-    //IMPLEMENT_ME();//13
-
-    // TODO: Once jobs are implemented, uncomment and fill the following line
-    // print_job_bg_start(job_id, pid, cmd);
-
     //create a job from the process queue and add it to the global job queue.
-        struct Job tempJob;
-        tempJob.id = BG_num;
-        tempJob.process_queue = processes_temp;
+    struct Job tempJob;
+    tempJob.id = BG_num;
+    tempJob.process_queue = processes_temp;
 
-        push_front_job_queue(&BG_Jobs,tempJob);
-        BG_num += 1;
+    push_front_job_queue(&BG_Jobs,tempJob);
+    BG_num += 1;
+
+    print_job_bg_start(tempJob.id, 0, "???");
   }
 }
 
