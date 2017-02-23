@@ -21,6 +21,20 @@
 
 #include "job_queue.h"
 
+#define    READ_END     0
+#define    WRITE_END    1
+
+/* Create a global tracker for active pipes */
+static int environment_pipes[2][2];        	/* Global Variable */
+
+
+static int next_pipe = 0;                  	/* Global Variable */
+
+
+static int prev_pipe = -1;
+
+
+
 job_queue BG_Jobs;
 job_queue FG_Jobs;
 
@@ -67,7 +81,7 @@ const char* lookup_env(const char* env_var) {
   // TODO: Remove warning silencers
   //(void) env_var; // Silence unused variable warning
 
-  return "???";
+ // return "???";
 }
 
 // Check the status of background jobs
@@ -111,6 +125,8 @@ void check_jobs_bg_status() {
       }
 
   }
+
+
 
 }
 
@@ -227,7 +243,11 @@ void run_kill(KillCommand cmd) {
 
   // TODO: Kill all processes associated with a background job
   //IMPLEMENT_ME();//8
-  kill(job_id, signal);
+   size_t length = length_job_queue(&BG_Jobs);
+   for(int i=0;i < length;i++){
+
+   }
+
 }
 
 
@@ -376,6 +396,7 @@ void create_process(CommandHolder holder) {
     bool r_app = holder.flags & REDIRECT_APPEND; // This can only be true if r_out
                                                  // is true
 
+    /*
      int pipey[2];
      pipe(pipey);
 
@@ -428,6 +449,7 @@ void create_process(CommandHolder holder) {
          close(pipey[0]);
 
          exit(0);
+
     }
     else{
         parent_run_command(holder.cmd);
@@ -436,6 +458,89 @@ void create_process(CommandHolder holder) {
         close(pipey[0]);
         //printf("I am the parent process. My PID is %d\n", parent);
     }
+
+    */
+
+
+
+
+
+
+
+     /********************************************/
+
+     if (p_out) {
+         /* This is the only condition under which a new pipe creation is required.
+            You should be able to understand why this is the case */
+         pipe (environment_pipes[next_pipe]);
+     }
+
+    // ...
+     pid_t pid;
+
+     pid = fork ();
+     push_front_pid_queue(&processes_temp,pid);
+     if (0 == pid) {
+         /* Check if this process needs to receive from previous process */
+         if (p_in) {
+             dup2 (environment_pipes[prev_pipe][READ_END], STDIN_FILENO);
+
+
+             /* We are never going to write to the previous pipe so we can safely close it */
+             close (environment_pipes[prev_pipe][WRITE_END]);
+         }
+
+         if (p_out) {
+             dup2 (environment_pipes[next_pipe][WRITE_END], STDOUT_FILENO);
+
+             /* We are never going to read from our own pipe so we can safely close it */
+             close (environment_pipes[next_pipe][READ_END]);
+         }
+
+         /* Execute what-ever needs to be run in the child process */
+
+         FILE *fout;
+         if(r_in == 1)
+         {
+             fout = fopen(holder.redirect_in, "r");
+             dup2(fileno(fout),1);
+             close(fout);
+
+         }
+         if (r_out == 1)
+         {
+
+             if (r_app == 1)
+             {
+                 fout = fopen(holder.redirect_out, "a");
+                 dup2(fileno(fout),1);
+
+             }
+             else
+             {
+                 fout = fopen(holder.redirect_out, "w");
+                 dup2(fileno(fout),1);
+             }
+         }
+
+         child_run_command (holder.cmd);
+
+         /* Adios child process */
+         exit (EXIT_SUCCESS);
+     } else {
+         /* Close the hanging pipes in parent */
+         if (p_in) {
+             close (environment_pipes[next_pipe][WRITE_END]);
+         }
+
+         /* Update the pipe trackers for next iteration */
+         next_pipe = (next_pipe + 1) % 2;
+         prev_pipe = (prev_pipe + 1) % 2;
+     }
+
+     /* This function can safely kick  the bucket now */
+     return;
+
 
 }
 
