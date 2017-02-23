@@ -522,13 +522,15 @@ void create_process(CommandHolder holder) {
          exit (EXIT_SUCCESS);
      } else {
          /* Close the hanging pipes in parent */
-         if (p_in) {
+         if (p_out) {
              close (environment_pipes[next_pipe][WRITE_END]);
          }
 
          /* Update the pipe trackers for next iteration */
          next_pipe = (next_pipe + 1) % 2;
          prev_pipe = (prev_pipe + 1) % 2;
+
+         parent_run_command(holder.cmd);
      }
 
      /* This function can safely kick  the bucket now */
