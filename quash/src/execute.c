@@ -22,14 +22,12 @@
 #include "job_queue.h"
 
 job_queue BG_Jobs;
-job_queue FG_Jobs;
 
 pid_queue processes_temp;
 
 bool initialized = 0;
 
 int BG_num;
-int FG_num;
 
 // Remove this and all expansion calls to it
 /**
@@ -82,15 +80,12 @@ void check_jobs_bg_status() {
       jobtype temp_job = pop_back_job_queue(&BG_Jobs);
       pid_queue processes = temp_job.process_queue;
 
-      pid_t first_process_in_job = pop_front_pid_queue(&processes);
-      push_front_pid_queue(&processes,first_process_in_job);
-
       size_t processes_num = length_pid_queue(&(processes));
       for(int j=0;j<processes_num;j++){
 
           pid_t process_id = pop_back_pid_queue(&processes);
-
-          if(kill(process_id,0) == 0){
+          int status;
+          if(waitpid(process_id, &status, WNOHANG) == 0){
               //the process is still running
               push_front_pid_queue(&processes,process_id);
           }
@@ -101,9 +96,7 @@ void check_jobs_bg_status() {
       }
       if(is_empty_pid_queue(&processes)){
           //the job is finished
-
-          //TODO: figure out what the command parameter is
-          print_job_bg_complete(temp_job.id, first_process_in_job, "???");
+          print_job_bg_complete(temp_job.id, temp_job.pid, temp_job.cmd);
       }
       else{
           //the job is not finished, put it back in the queue
@@ -482,20 +475,20 @@ void run_script(CommandHolder* holders) {
     struct Job tempJob;
     tempJob.id = BG_num;
     tempJob.process_queue = processes_temp;
+    tempJob.cmd = get_command_string();
+    tempJob.pid = peek_back_pid_queue(&processes_temp);
 
     push_front_job_queue(&BG_Jobs,tempJob);
     BG_num += 1;
 
-    print_job_bg_start(tempJob.id, 0, "???");
+    print_job_bg_start(tempJob.id, tempJob.pid, tempJob.cmd);
   }
 }
 
 void Initialize(){
-    FG_Jobs = new_job_queue(1);
     BG_Jobs = new_job_queue(1);
 
-    BG_num = 0;
-    FG_num = 0;
+    BG_num = 1;
     initialized = 1;
 
 }

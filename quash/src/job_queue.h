@@ -14,6 +14,8 @@
 typedef struct Job{
     int id;
     pid_queue process_queue;
+    char* cmd;
+    pid_t pid;
 } jobtype;
 
 /*
