@@ -231,20 +231,24 @@ void run_kill(KillCommand cmd) {
   int job_id = cmd.job;
 
   // TODO: Remove warning silencers
-  (void) signal; // Silence unused variable warning
-  (void) job_id; // Silence unused variable warning
+  //(void) signal; // Silence unused variable warning
+  //(void) job_id; // Silence unused variable warning
 
   // TODO: Kill all processes associated with a background job
   //IMPLEMENT_ME();//8
   while(length_job_queue(&BG_Jobs) != 0 )
   {
 
-      pid_queue tempy;
+      jobtype tempy;
 
-      tempy = new_pid_queue(1);
-          while(!(is_empty_pid_queue(&tempy))){
-              pid_t JoelEmbiid = pop_back_pid_queue(&processes_temp);
-              kill(pop_front_job_queue(&JoelEmbiid),signal);
+      tempy = pop_front_job_queue(&BG_Jobs);
+      pid_queue pidq = tempy.process_queue;
+
+          while(!(is_empty_pid_queue(&pidq))){
+
+              pid_t JoelEmbiid = pop_back_pid_queue(&pidq);
+              kill(JoelEmbiid,signal);
+
           }
 
       }
