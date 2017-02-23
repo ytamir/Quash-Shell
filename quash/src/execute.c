@@ -236,10 +236,19 @@ void run_kill(KillCommand cmd) {
 
   // TODO: Kill all processes associated with a background job
   //IMPLEMENT_ME();//8
-   size_t length = length_job_queue(&BG_Jobs);
-   for(int i=0;i < length;i++){
+  while(length_job_queue(&BG_Jobs) != 0 )
+  {
 
-   }
+      pid_queue tempy;
+
+      tempy = new_pid_queue(1);
+          while(!(is_empty_pid_queue(&tempy))){
+              pid_t JoelEmbiid = pop_back_pid_queue(&processes_temp);
+              kill(pop_front_job_queue(&JoelEmbiid),signal);
+          }
+
+      }
+
 
 }
 
