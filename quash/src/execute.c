@@ -494,8 +494,7 @@ void create_process(CommandHolder holder) {
          if(r_in == 1)
          {
              fout = fopen(holder.redirect_in, "r");
-             dup2(fileno(fout),1);
-             close(fout);
+             dup2(fileno(fout),0);
 
          }
          if (r_out == 1)
