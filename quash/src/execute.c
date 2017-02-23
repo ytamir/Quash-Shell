@@ -257,16 +257,14 @@ void run_pwd() {
 
 // Prints all background jobs currently in the job list to stdout
 void run_jobs() {
-  printf("Current Background Jobs: ");
 
   size_t length = length_job_queue(&BG_Jobs);
   for(int i=0;i < length;i++){
 
       jobtype temp_job = pop_back_job_queue(&BG_Jobs);
-      printf(" %d,",temp_job.id);
+      print_job(temp_job.id, temp_job.pid, temp_job.cmd);
       push_front_job_queue(&BG_Jobs, temp_job);
   }
-  printf("\n");
   // Flush the buffer before returning
   fflush(stdout);
 }
