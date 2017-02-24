@@ -210,8 +210,7 @@ void run_kill(KillCommand cmd) {
       kill(JoelEmbiid,signal);//KILL THE PROCESS
   }
 
-  print_job_bg_complete(tempJob.id,tempJob.pid,tempJob.cmd); // print the background proccess
-
+  push_front_job_queue(&BG_Jobs, tempJob); //put the job back in the queue, even though it's empty. We'll let check_bg_status handle it from here
 
 }
 
