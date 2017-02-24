@@ -230,28 +230,30 @@ void run_kill(KillCommand cmd) {
   int signal = cmd.sig;
   int job_id = cmd.job;
 
-  // TODO: Remove warning silencers
-  //(void) signal; // Silence unused variable warning
-  //(void) job_id; // Silence unused variable warning
-
-  // TODO: Kill all processes associated with a background job
-  //IMPLEMENT_ME();//8
-  while(length_job_queue(&BG_Jobs) != 0 )
-  {
-
-      jobtype tempy;
-
-      tempy = pop_front_job_queue(&BG_Jobs);
-      pid_queue pidq = tempy.process_queue;
-
-          while(!(is_empty_pid_queue(&pidq))){
-
-              pid_t JoelEmbiid = pop_back_pid_queue(&pidq);
-              kill(JoelEmbiid,signal);
-
-          }
-
+  jobtype tempJob;
+  size_t length = length_job_queue(&BG_Jobs);
+  for(int i=0;i < length;i++){
+      tempJob = pop_back_job_queue(&BG_Jobs);
+      if(tempJob.id == job_id){
+          break;
       }
+      else if(i == length-1){
+          printf("This Job ID does not exist: %d\n",job_id);
+          return;
+      }
+      else{
+          push_front_job_queue(&BG_Jobs,tempJob);
+      }
+  }
+
+  pid_queue SeventySixers = tempJob.process_queue;
+
+  while(!(is_empty_pid_queue(&SeventySixers))){
+      pid_t JoelEmbiid = pop_back_pid_queue(&SeventySixers);
+      kill(JoelEmbiid,signal);
+  }
+
+  print_job_bg_complete(tempJob.id,tempJob.pid,tempJob.cmd);
 
 
 }
